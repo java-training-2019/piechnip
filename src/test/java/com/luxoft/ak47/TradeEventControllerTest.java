@@ -1,7 +1,9 @@
 package com.luxoft.ak47;
 
 import io.restassured.RestAssured;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
 
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.hasXPath;
@@ -18,8 +20,27 @@ class TradeEventControllerTest {
                 .then().statusCode(200);
     }
 
+    @Test
+    void doesCurrencyHave3CapitalLetters() {
+        String currency = when().get("/tradeEvent/xxx").then()
+                .statusCode(200).extract().xmlPath().getString("tradeEvent.currency");
+
+                Assertions.assertThat(currency).isUpperCase();
+                Assertions.assertThat(currency).hasSize(3);
+        }
+
+    @Test
+    void isTradeLocationPresentForObs() {
+        when().get("/tradeEvent/OBS-12").then()
+                .body("tradeEvent.tradeLocation", equalTo("HKG"));
+    }
+
+    @Test
+    void name() {
+    }
+
     //test that currency should have 3 uppercase characters
-    //controller sjould return random currency from a list
+    //controller should return random currency from a list
 
     @Test
     void shouldGet404OnNonExistingPage() {
@@ -33,7 +54,7 @@ class TradeEventControllerTest {
                 .statusCode(200)
                 .body("tradeEvent.version", equalTo("0"))
                 .body("tradeEvent.id", equalTo(id))
-                .body(not(hasXPath("tradeEvent/tradeLocation")));
+                .body(not(hasXPath("/tradeEvent/tradeLocation")));
     }
 
     @Test
